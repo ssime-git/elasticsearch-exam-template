@@ -1,0 +1,49 @@
+name: 🐛 Problème technique
+description: Signaler un problème avec l'examen
+title: "[BUG] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de signaler le problème ! Soyez précis pour nous aider à vous aider.
+  
+  - type: dropdown
+    id: component
+    attributes:
+      label: Composant affecté
+      options:
+        - ElasticSearch (connexion, indexation)
+        - Tests automatiques
+        - Docker Compose
+        - Requêtes d'examen
+        - GitHub Actions
+    validations:
+      required: true
+  
+  - type: textarea
+    id: description
+    attributes:
+      label: Description du problème
+      description: Que s'est-il passé ? Qu'attendiez-vous ?
+    validations:
+      required: true
+  
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Étapes de reproduction
+      description: Comment reproduire le problème ?
+      placeholder: |
+        1. Exécuter docker-compose up -d
+        2. Lancer pytest tests/
+        3. Voir l'erreur...
+    validations:
+      required: true
+  
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs/Messages d'erreur
+      description: Copiez les logs pertinents
+      render: shell

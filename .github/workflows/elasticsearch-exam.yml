@@ -1,0 +1,189 @@
+# .github/workflows/elasticsearch-exam.yml
+name: ElasticSearch Exam Validation
+
+on:
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'src/queries/**'
+      - 'src/etl/**'
+      - 'data/**'
+      - 'tests/**'
+
+env:
+  ELASTICSEARCH_VERSION: 7.15.0
+
+jobs:
+  validate-elasticsearch-exam:
+    runs-on: ubuntu-latest
+    
+    services:
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: false
+          ES_JAVA_OPTS: -Xms512m -Xmx512m
+        options: >-
+          --health-cmd "curl -s -f http://localhost:9200/_cat/health?h=st | grep -q '\(green\|yellow\)'"
+          --health-interval 10s
+          --health-timeout 60s
+          --health-retries 12
+          --health-start-period 60s
+        ports:
+          - 9200:9200
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Wait for Elasticsearch
+        run: |
+          echo "Waiting for Elasticsearch to be ready..."
+          timeout 120s bash -c 'until curl -s -f http://localhost:9200/_cat/health?h=st | grep -q "\(green\|yellow\)"; do echo "Waiting..."; sleep 5; done'
+          echo "Elasticsearch is ready!"
+
+      - name: Validate Elasticsearch connection
+        run: |
+          curl -X GET "localhost:9200/_cluster/health?pretty"
+
+      - name: Run ETL Process
+        env:
+          ELASTICSEARCH_HOST: localhost
+        run: |
+          python src/etl/etl_service.py
+
+      - name: Validate index creation
+        run: |
+          # Check if index exists
+          curl -X GET "localhost:9200/_cat/indices?v"
+          
+          # Check mapping
+          curl -X GET "localhost:9200/eval_new/_mapping?pretty"
+          
+          # Check document count
+          curl -X GET "localhost:9200/eval_new/_count?pretty"
+
+      - name: Run integration tests
+        env:
+          ELASTICSEARCH_HOST: localhost
+        run: |
+          pytest src/integration_tests/test_etl.py -v --tb=short
+
+      - name: Validate student queries
+        env:
+          ELASTICSEARCH_HOST: localhost
+        run: |
+          pytest tests/test_elastic_search.py -v --tb=short --junit-xml=test-results/pytest-results.xml
+
+      - name: Create test results directory
+        if: always()
+        run: mkdir -p test-results
+
+      - name: Generate exam report
+        if: always()
+        run: |
+          python scripts/generate_exam_report.py
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: exam-results-${{ github.event.pull_request.number }}
+          path: |
+            test-results/
+            exam-report.html
+          retention-days: 30
+
+      - name: Comment PR with results
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const path = './exam-report.md';
+            
+            if (fs.existsSync(path)) {
+              const report = fs.readFileSync(path, 'utf8');
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: report
+              });
+            }
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run security scan
+        uses: github/super-linter@v4
+        env:
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_PYTHON: true
+          VALIDATE_DOCKERFILE: true
+          VALIDATE_YAML: true
+
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+
+      - name: Install quality tools
+        run: |
+          pip install flake8 black isort bandit safety
+
+      - name: Check code formatting
+        run: |
+          black --check src/ tests/
+
+      - name: Check imports
+        run: |
+          isort --check-only src/ tests/
+
+      - name: Lint code
+        run: |
+          flake8 src/ tests/ --max-line-length=88
+
+      - name: Security scan
+        run: |
+          bandit -r src/ -f json -o bandit-report.json || true
+          safety check --json --output safety-report.json || true
+
+      - name: Upload quality reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-quality-reports
+          path: |
+            bandit-report.json
+            safety-report.json

@@ -1,0 +1,259 @@
+{
+    "2-1": {
+        "unique_division_name": {
+            "value": 4
+        }
+    },
+    "2-2": {
+        "unique_department_name": {
+            "value": 7
+        }
+    },
+    "2-3": {
+        "unique_class_name": {
+            "value": 21
+        }
+    },
+    "2-4": {
+        "products_by_department": {
+            "buckets": [
+                {
+                    "key": "Tops",
+                    "doc_count": 10468
+                },
+                {
+                    "key": "Dresses",
+                    "doc_count": 6319
+                },
+                {
+                    "key": "Bottoms",
+                    "doc_count": 3799
+                }
+            ]
+        }
+    },
+    "2-5": {
+        "by_division": {
+            "buckets": [
+                {
+                    "key": "General",
+                    "by_department": {
+                        "buckets": [
+                            {
+                                "key": "Tops",
+                                "doc_count": 6280
+                            },
+                            {
+                                "key": "Dresses",
+                                "doc_count": 3730
+                            },
+                            {
+                                "key": "Bottoms",
+                                "doc_count": 2450
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "General Petite",
+                    "by_department": {
+                        "buckets": [
+                            {
+                                "key": "Tops",
+                                "doc_count": 3631
+                            },
+                            {
+                                "key": "Dresses",
+                                "doc_count": 2199
+                            },
+                            {
+                                "key": "Bottoms",
+                                "doc_count": 1349
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": "Intimates",
+                    "by_department": {
+                        "buckets": [
+                            {
+                                "key": "Intimate",
+                                "doc_count": 1502
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    },
+    "3": {
+        "missing_division": {
+            "doc_count": 0
+        },
+        "missing_department": {
+            "doc_count": 0
+        },
+        "missing_class": {
+            "doc_count": 0
+        },
+        "missing_age": {
+            "doc_count": 0
+        },
+        "missing_rating": {
+            "doc_count": 0
+        },
+        "missing_review_text": {
+            "doc_count": 13442
+        }
+    },
+    "4-1": {
+        "rating_distribution": {
+            "buckets": [
+                {
+                    "key": 5,
+                    "doc_count": 13131
+                },
+                {
+                    "key": 4,
+                    "doc_count": 5077
+                },
+                {
+                    "key": 3,
+                    "doc_count": 2871
+                },
+                {
+                    "key": 2,
+                    "doc_count": 1565
+                },
+                {
+                    "key": 1,
+                    "doc_count": 842
+                }
+            ]
+        }
+    },
+    "4-2": {
+        "age_stats": {
+            "count": 23472,
+            "min": 18,
+            "max": 99,
+            "avg": 43.2,
+            "sum": 1013990
+        }
+    },
+    "4-3": {
+        "class_scores": {
+            "buckets": [
+                {
+                    "key": "Jeans",
+                    "doc_count": 1147,
+                    "avg_score": {
+                        "value": 4.360941586748038
+                    }
+                },
+                {
+                    "key": "Pants",
+                    "doc_count": 1388,
+                    "avg_score": {
+                        "value": 4.265850144092219
+                    }
+                }
+            ]
+        }
+    },
+    "4-4": {
+        "age_histogram": {
+            "buckets": [
+                {
+                    "key": 20.0,
+                    "doc_count": 10589,
+                    "top_class_names": {
+                        "buckets": [
+                            {
+                                "key": "Dresses",
+                                "doc_count": 3101
+                            },
+                            {
+                                "key": "Knits",
+                                "doc_count": 2108
+                            },
+                            {
+                                "key": "Blouses",
+                                "doc_count": 1269
+                            }
+                        ]
+                    }
+                },
+                {
+                    "key": 40.0,
+                    "doc_count": 10075,
+                    "top_class_names": {
+                        "buckets": [
+                            {
+                                "key": "Dresses",
+                                "doc_count": 2584
+                            },
+                            {
+                                "key": "Knits",
+                                "doc_count": 2088
+                            },
+                            {
+                                "key": "Blouses",
+                                "doc_count": 1413
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    },
+    "5-1": {
+        "significant_terms": {
+            "buckets": [
+                {"key": "perfect", "doc_count": 4267},
+                {"key": "great", "doc_count": 4566},
+                {"key": "comfort", "doc_count": 2902},
+                {"key": "love", "doc_count": 7618},
+                {"key": "wear", "doc_count": 5548}
+            ]
+        }
+    },
+    "5-2": {
+        "significant_terms": {
+            "buckets": [
+                {"key": "disappoint", "doc_count": 354},
+                {"key": "return", "doc_count": 498},
+                {"key": "cheap", "doc_count": 155},
+                {"key": "huge", "doc_count": 191},
+                {"key": "unflattering", "doc_count": 147}
+            ]
+        }
+    },
+    "5-3": {
+        "by_product": {
+            "buckets": [
+                {
+                    "key": 37,
+                    "doc_count": 4,
+                    "avg_rating": {"value": 5.0},
+                    "review_count": {"value": 4},
+                    "positive_feedback": {"value": 5.0}
+                }
+            ]
+        }
+    },
+    "5-4": {
+        "by_product": {
+            "buckets": [
+                {
+                    "key": 169,
+                    "doc_count": 3,
+                    "avg_rating": {"value": 1.0},
+                    "review_count": {"value": 3},
+                    "positive_feedback": {"value": 10.0}
+                }
+            ]
+        }
+    }
+}

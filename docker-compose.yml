@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -f http://localhost:9200/_cat/health?h=st | grep -q '\\(green\\|yellow\\)'"]
+      interval: 10s
+      timeout: 60s
+      retries: 12
+      start_period: 60s
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+  etl:
+    build:
+      context: .
+      dockerfile: src/etl/Dockerfile
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    volumes:
+      - ./:/app
+      - ./data:/app/data
+    environment:
+      - ELASTICSEARCH_HOST=elasticsearch
+      - PYTHONUNBUFFERED=1
+
+  integration-tests:
+    build: 
+      context: .
+      dockerfile: src/integration_tests/Dockerfile
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      etl:
+        condition: service_completed_successfully
+    volumes:
+      - ./:/app
+      - ./data:/app/data
+      - ./test-results:/app/test-results
+    environment:
+      - ELASTICSEARCH_HOST=elasticsearch
+      - PYTHONUNBUFFERED=1
+    command: >
+      sh -c "
+        pytest -v src/integration_tests/test_etl.py tests/test_elastic_search.py | tee /app/test-results/test_results.txt
+      "
+
+volumes:
+  es_data:
+    driver: local
